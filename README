@@ -1,10 +1,12 @@
 Yet another Python implementation of collapsed Gibbs sampling for Latent 
 Dirichlet Allocation 
 (http://en.wikipedia.org/wiki/Latent_Dirichlet_allocation),
-as described in (http://www.pnas.org/content/101/suppl.1/5228.full.pdf):
+as described in
 
 	Griffiths, T. L., & Steyvers, M. (2004). Finding scientific topics. 
 	Proceedings of the National Academy of Sciences, 101, 5228-5235
+
+Full text: http://www.pnas.org/content/101/suppl.1/5228
 
 Though other implementations already exist, I wanted to write my own for the
 sake of understanding the algorithm.

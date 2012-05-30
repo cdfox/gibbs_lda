@@ -202,6 +202,8 @@ class LDASampler(object):
 
 def tokenize(docs, min_word_size=3, min_times=2, max_ratio=0.5):
     """
+    Prepare documents for LDA.
+
     Remove non-alphanumeric characters, convert to lowercase,
     split on whitespace, remove short words, remove rare words,
     and remove frequent words.
