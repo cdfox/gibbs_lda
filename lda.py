@@ -1,5 +1,4 @@
 import random
-import logging
 import math
 import json
 import re
@@ -18,18 +17,12 @@ class LDASampler(object):
     """
 
     def __init__(self, docs=None, num_topics=None, alpha=0.1, beta=0.1, 
-                 json_state=None):
+                 state=None):
         """
         Initialize sampler for the given data or load previous run.
         """
-        if json_state:
-            state = json.loads(json_state)
-            self.a = state['a']
-            self.b = state['b']
-            self.T = state['T']
-            self.docs = state['docs']
-            self.vocab = state['vocab']
-            self.assignments = state['assignments']
+        if state:
+            self.__dict__ = json.loads(state)
         else:
             self.a = float(alpha)
             self.b = float(beta)
@@ -37,21 +30,20 @@ class LDASampler(object):
             self.docs = docs
             self.vocab = list(set(word for doc in self.docs 
                                         for word in doc))
-        self.D = len(self.docs)  
-        self.W = len(self.vocab)
+            self.D = len(self.docs)  
+            self.W = len(self.vocab)
 
-        # mapping from words to integers
-        to_int = {word: w for (w, word) 
-                            in enumerate(self.vocab)}
+            # mapping from words to integers
+            to_int = {word: w for (w, word) 
+                                in enumerate(self.vocab)}
 
-        # count data for Gibbs sampling         
-        self.nt = [0] * self.T
-        self.nd = [len(doc) for doc in self.docs]
-        self.nwt = [[0] * self.T for _ in self.vocab]
-        self.ndt = [[0] * self.T for _ in self.docs]
+            # count data for Gibbs sampling         
+            self.nt = [0] * self.T
+            self.nd = [len(doc) for doc in self.docs]
+            self.nwt = [[0] * self.T for _ in self.vocab]
+            self.ndt = [[0] * self.T for _ in self.docs]
 
-        # initialize topic assignments, if needed, and counts
-        if not json_state:
+            # initialize topic assignments and counts
             self.assignments = []
             for d, doc in enumerate(docs):
                 for i, word in enumerate(doc):
@@ -59,27 +51,21 @@ class LDASampler(object):
                     t = random.randint(0, self.T - 1)
                     z = [d, i, w, t]
                     self.assignments.append(z)
-        for z in self.assignments:
-            d, _, w, t = z
-            self.nt[t] += 1
-            self.nwt[w][t] += 1
-            self.ndt[d][t] += 1
+            for z in self.assignments:
+                d, _, w, t = z
+                self.nt[t] += 1
+                self.nwt[w][t] += 1
+                self.ndt[d][t] += 1
 
     def to_json(self):
         """
         Representation of sampler in JSON.
         """
-        return json.dumps({
-            'a': self.a,
-            'b': self.b,
-            'T': self.T,
-            'docs': self.docs,
-            'vocab': self.vocab,
-            'assignments': self.assignments})
+        return json.dumps(self.__dict__)
 
     def next(self):
         """
-        Sample a new state for the query variables.
+        Sample a new state for the topic assignments.
         """
         for z in self.assignments:
             self.sample(z)
